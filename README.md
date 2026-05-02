@@ -38,4 +38,4 @@ http://YOUR_EC2_PUBLIC_IP:8086
 
 ## Notes
 - This repo does **not** store secrets or tokens.
-- Keep `.env` on the server (already in `.gitignore`.
+- Keep `.env` on the server (already in `.gitignore`).
