@@ -6,24 +6,25 @@ Receives ESP32 sensor data -> writes to InfluxDB -> checks thresholds -> alerts 
 
 import json
 import time
+import os
 import boto3
 import paho.mqtt.client as mqtt
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 from datetime import datetime
 
-# ── CONFIGURATION — FILL IN YOUR VALUES ─────────────────────
-INFLUX_URL    = "http://localhost:8086"
-INFLUX_TOKEN  = "PASTE_YOUR_INFLUXDB_TOKEN_HERE"
-INFLUX_ORG    = "IslingtonCollege"
-INFLUX_BUCKET = "room_security"
+# ── CONFIGURATION (ENV + FALLBACKS) ───────────────────────────
+INFLUX_URL    = os.getenv("INFLUX_URL", "http://localhost:8086")
+INFLUX_TOKEN  = os.getenv("INFLUX_TOKEN", "PASTE_YOUR_INFLUXDB_TOKEN_HERE")
+INFLUX_ORG    = os.getenv("INFLUX_ORG", "IslingtonCollege")
+INFLUX_BUCKET = os.getenv("INFLUX_BUCKET", "room_security")
 
-SNS_TOPIC_ARN = "PASTE_YOUR_SNS_TOPIC_ARN_HERE"
-AWS_REGION    = "us-east-1"   # change to your sandbox region
+SNS_TOPIC_ARN = os.getenv("SNS_TOPIC_ARN", "PASTE_YOUR_SNS_TOPIC_ARN_HERE")
+AWS_REGION    = os.getenv("AWS_REGION", "us-east-1")
 
-MQTT_BROKER   = "localhost"
-MQTT_PORT     = 1883
-MQTT_TOPIC    = "room/sensors"
+MQTT_BROKER   = os.getenv("MQTT_BROKER", "localhost")
+MQTT_PORT     = int(os.getenv("MQTT_PORT", "1883"))
+MQTT_TOPIC    = os.getenv("MQTT_TOPIC", "room/sensors")
 
 # ── THRESHOLDS ───────────────────────────────────────────────
 TEMP_MAX      = 30    # celsius — above this = anomaly
@@ -55,6 +56,9 @@ def check_anomalies(temp, light, motion):
 
 def send_sns_alert(anomalies):
     global last_alert_time
+    if not SNS_TOPIC_ARN or SNS_TOPIC_ARN.startswith("PASTE_"):
+        print("SNS_TOPIC_ARN not set — skipping SNS alert")
+        return
     now = time.time()
     if now - last_alert_time < 300:  # 5 min cooldown between alerts
         print("Alert cooldown active — skipping SNS")
