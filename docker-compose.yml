@@ -17,6 +17,29 @@ services:
       - influxdb_data:/var/lib/influxdb2
       - influxdb_data:/etc/influxdb2
 
+  grafana:
+    image: grafana/grafana-oss:10.4.2
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin           # Change this for production!
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - influxdb
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  room-subscriber:
+    build: .
+    env_file:
+      - .env
+    depends_on:
+      - mosquitto
+      - influxdb
+      - grafana
+    restart: unless-stopped
+
 volumes:
   mosquitto_data:
   influxdb_data:
+  grafana_data:
