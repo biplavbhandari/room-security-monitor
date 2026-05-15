@@ -17,6 +17,7 @@ services:
       - influxdb_data:/var/lib/influxdb2
       - influxdb_data:/etc/influxdb2
 
+<<<<<<< HEAD
   grafana:
     image: grafana/grafana-oss:10.4.2
     ports:
@@ -29,6 +30,8 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
 
+=======
+>>>>>>> 0b250a89384a8f499ca50ad5a402b71789d850cc
   room-subscriber:
     build: .
     env_file:
@@ -36,10 +39,16 @@ services:
     depends_on:
       - mosquitto
       - influxdb
+<<<<<<< HEAD
       - grafana
+=======
+>>>>>>> 0b250a89384a8f499ca50ad5a402b71789d850cc
     restart: unless-stopped
 
 volumes:
   mosquitto_data:
   influxdb_data:
+<<<<<<< HEAD
   grafana_data:
+=======
+>>>>>>> 0b250a89384a8f499ca50ad5a402b71789d850cc
