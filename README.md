@@ -107,11 +107,9 @@ The CloudFormation template automates:
 - Docker environment setup
 - MQTT, InfluxDB, and Grafana deployment
 
-CloudFormation template location:
+CloudFormation template:
 
-```text
-cloudformation/room-security-stack.yaml
-```
+[room-security-stack.yaml](cloudformation/room-security-stack.yaml)
 
 ---
 
