@@ -87,7 +87,7 @@ Alerts are automatically sent via Amazon SNS email notifications.
 
 ### Grafana Dashboard
 
-![Grafana Dashboard](screenshots/grafana_screenshot.jpeg)
+![Grafana Dashboard](screenshots/graphana_screenshot.jpeg)
 
 ---
 
