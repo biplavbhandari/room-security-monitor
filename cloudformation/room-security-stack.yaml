@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Room Security Monitor Stack
+
+Parameters:
+  KeyPairName:
+    Description: Name of an existing EC2 Key Pair for SSH
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: room-security-key
+
+  SSHLocation:
+    Description: IP address range for SSH (e.g., 1.2.3.4/32)
+    Type: String
+    Default: 0.0.0.0/0             # Change to just your IP for best security
+
+Resources:
+  RoomSecSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Room Security Monitor SG
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref SSHLocation
+        - IpProtocol: tcp
+          FromPort: 1883
+          ToPort: 1883
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8086
+          ToPort: 8086
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+
+  RoomSecInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      SecurityGroupIds:
+        - !Ref RoomSecSG
+      KeyName: !Ref KeyPairName
+      ImageId: ami-0fc5d935ebf8bc3bc        # Ubuntu 22.04 LTS (us-east-1). Change if in a different region!
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          apt-get update -y
+          apt-get install -y docker.io docker-compose git
+          systemctl enable --now docker
+          groupadd docker || true
+          usermod -aG docker ubuntu
+          su - ubuntu -c "
+            cd ~
+            # Replace with your repository URL
+            git clone https://github.com/yourusername/room-security-monitor.git
+            cd room-security-monitor
+            cp .env.example .env
+            docker compose up -d --build
+          "
+
+  RoomSecSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: room-security-notifications
+
+Outputs:
+  InstancePublicIP:
+    Description: Public IP of the EC2 instance
+    Value: !GetAtt RoomSecInstance.PublicIp
+
+  SNSTopicARN:
+    Description: SNS Topic ARN (use this in your .env as AWS_SNS_TOPIC_ARN)
+    Value: !Ref RoomSecSNSTopic
