@@ -182,6 +182,15 @@ http://YOUR_EC2_PUBLIC_IP:3000
 ```
 
 ---
+## InfluxDB Access
+
+Open InfluxDB from browser:
+
+```text
+http://YOUR_EC2_PUBLIC_IP:8086
+```
+
+---
 
 ## Security Notes
 
